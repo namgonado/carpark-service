@@ -1,0 +1,66 @@
+server:
+  error:
+    include-stacktrace: on_param
+    include-message: on_param
+  port: ${SERVER_PORT}
+  forward-headers-strategy: none
+
+spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+  application:
+    name: domain-core-service
+  profiles:
+    active: ${service.env_name:dev}
+  devtools:
+    add-properties: false
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        order_updates: true
+        jdbc:
+          batch_size: 20
+  datasource:
+#    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?currentSchema=${POSTGRES_SCHEMA}&serverTimezone=UTC
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/AllianceNic
+    username: ${POSTGRES_USER:root}
+    password: ${POSTGRES_PASSWORD:Rootadmin1}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  flyway:
+    baseline-on-migrate: true
+    enabled: true
+    locations: classpath:db/migration
+    schemas:
+      - ${POSTGRES_SCHEMA}
+  servlet:
+    multipart:
+      max-file-size: 500MB
+#  quartz:
+#    job-store-type: jdbc
+#    jdbc:
+#      initialize-schema: never
+#    properties:
+#      org:
+#        quartz:
+#          scheduler:
+#            instanceId: AUTO
+#          jobStore:
+#            tablePrefix: ${POSTGRES_SCHEMA}.qrtz_
+#            class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+#            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+#            misfireThreshold: 60000
+#            clusterCheckinInterval: 5000
+#            isClustered: true
+springdoc:
+  server-external-base-url: ${SERVER_EXTERNAL_BASE_URL}
+  server-external-port: ${SERVER_EXTERNAL_PORT}
+  api-docs:
+    path: /api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
