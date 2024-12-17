@@ -1,0 +1,69 @@
+Configutation:
+  name: Default
+
+  Properties:
+    Property:
+      name: log-path
+      value: "logs"
+
+  Appenders:
+    Console:
+      name: Console
+      target: SYSTEM_OUT
+      PatternLayout:
+#        pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} %level{length=5} [%t] [instance: ${spring:spring.application.name}] [%X{AWS-XRAY-TRACE-ID}] %logger{36} - %msg%n"
+        pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} \u001B[32m%level{length=5}\u001B[0m [%t] [\u001B[35m${spring:spring.application.name}\u001B[0m] [\u001B[33m%X{AWS-XRAY-TRACE-ID}\u001B[0m] \u001B[36m%logger{36}\u001B[0m - %msg%n"
+    RollingFile:
+      name: RollingFile
+      fileName: ${log-path}/app.log
+      filePattern: "${log-path}/app-%d{yyyy-MM-dd}-%i.log.gz"
+#      Human readability
+      PatternLayout:
+        pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} %level{length=5} [%t] [instance: ${spring:spring.application.name}] %logger{36} - %msg%n"
+#      JSONLayout:
+#        compact: true
+#        eventEol: true
+#        properties: true
+#        stacktraceAsString: true
+#        includeTimeMillis: true
+#        KeyValuePair:
+#          key: instance
+#          value: ${spring:spring.application.name}
+      Policies:
+        TimeBasedTriggeringPolicy:
+          interval: 1
+          modulate: true
+        SizeBasedTriggeringPolicy:
+          size: 50MB
+          # Trigger every day at midnight that also scan
+          # roll-over strategy that deletes older file
+        CronTriggeringPolicy:
+          schedule: "0 0 0 * * ?"
+      DefaultRolloverStrategy:
+        max: 9
+        Delete:
+          basePath: ${log-path}
+          maxDepth: 1
+          IfFileName:
+            glob: "app-*.log.gz"
+          IfLastModified:
+            age: 14d
+            IfAny:
+              IfAccumulatedFileSize:
+                exceeds: 50MB
+              IfAccumulatedFileCount:
+                exceeds: 1
+
+  Loggers:
+    Root:
+      level: info
+      AppenderRef:
+        - ref: Console
+    logger:
+      - name: com.nam
+        additivity: false
+        level: info
+        AppenderRef:
+          - ref: Console
+      - name: org.hibernate.validator
+        additivity: false

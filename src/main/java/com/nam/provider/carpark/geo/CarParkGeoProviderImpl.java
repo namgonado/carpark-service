@@ -1,9 +1,11 @@
-package com.nam.provider;
+package com.nam.provider.carpark.geo;
 
 import com.nam.model.CarParkGeo;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -23,14 +25,14 @@ import static com.nam.provider.constant.CarParkGeoHeaders.*;
 
 @Component
 public class CarParkGeoProviderImpl implements CarParkGeoProvider {
-
+    private static final Logger logger = LoggerFactory.getLogger(CarParkGeoProviderImpl.class);
     private static final String CSV_FILE_PATH = "carParkData/HDBCarparkInformation.csv";
     @Autowired
     ApplicationContext applicationContext;
     private Map<String, CarParkGeo> carParkGeoMap = new HashMap<>();
 
     @EventListener(ContextRefreshedEvent.class)
-    public void init() {
+    public void init() throws IOException {
         Resource resource = applicationContext.getResource("classpath:" + CSV_FILE_PATH);
         try (Reader reader = new InputStreamReader(resource.getInputStream());
              CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader())) {
@@ -53,7 +55,8 @@ public class CarParkGeoProviderImpl implements CarParkGeoProvider {
                 carParkGeoMap.put(carParkGeo.getCarParkNo(), carParkGeo);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error parsing CSV file: {}", CSV_FILE_PATH, e);
+            throw e;
         }
     }
 

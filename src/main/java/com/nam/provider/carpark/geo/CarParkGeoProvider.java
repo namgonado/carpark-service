@@ -1,4 +1,4 @@
-package com.nam.provider;
+package com.nam.provider.carpark.geo;
 
 import com.nam.model.CarParkGeo;
 
