@@ -1,5 +1,5 @@
 package com.nam.provider.carpark.availability;
 
-public interface CarParkProvider {
+public interface CarParkAvailabilityProvider {
     void poll();
 }

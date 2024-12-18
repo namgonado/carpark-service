@@ -1,10 +1,15 @@
 package com.nam.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "car_park_info")
 public class CarParkInfo {
     @Id

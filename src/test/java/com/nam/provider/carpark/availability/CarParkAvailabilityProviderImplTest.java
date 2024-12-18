@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-class CarParkProviderImplTest {
+class CarParkAvailabilityProviderImplTest {
 
     @Mock
     private RestTemplate restTemplate;
@@ -29,7 +29,7 @@ class CarParkProviderImplTest {
     private CarParkSyncUpSession carParkSyncUpSession;
 
     @InjectMocks
-    private CarParkProviderImpl carParkProvider;
+    private CarParkAvailabilityProviderImpl carParkProvider;
 
     private CarParkAvailabilityResponse response;
 

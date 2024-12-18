@@ -1,7 +1,6 @@
 package com.nam.provider.carpark.availability;
 
 import com.nam.model.CarPark;
-import com.nam.provider.carpark.availability.CarParkSyncUpSession;
 import com.nam.provider.carpark.availability.cache.CarParkSyncUpCache;
 import com.nam.provider.carpark.availability.cache.SyncUpCacheFactory;
 import com.nam.repository.CarParkRepository;
@@ -14,7 +13,7 @@ import java.util.Optional;
 
 @Service
 public class CarParkSyncUpSessionImpl implements CarParkSyncUpSession {
-    private static String CACHE_TIMESTAMP = "CACHE_TIMESTAMP";
+    private static final String CACHE_TIMESTAMP = "CACHE_TIMESTAMP";
     @Autowired
     private CarParkRepository carParkRepository;
 

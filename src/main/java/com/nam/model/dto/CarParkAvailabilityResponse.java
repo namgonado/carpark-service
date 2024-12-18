@@ -3,7 +3,6 @@ package com.nam.model.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public class CarParkAvailabilityResponse {

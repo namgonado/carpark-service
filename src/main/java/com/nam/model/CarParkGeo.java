@@ -6,8 +6,8 @@ import lombok.Data;
 public class CarParkGeo {
     private String carParkNo;
     private String address;
-    private double xCoord;
-    private double yCoord;
+    private double lat;
+    private double lon;
     private String carParkType;
     private String typeOfParkingSystem;
     private String shortTermParking;

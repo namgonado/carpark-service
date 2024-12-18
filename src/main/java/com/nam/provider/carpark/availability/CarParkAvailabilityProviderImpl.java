@@ -2,6 +2,7 @@ package com.nam.provider.carpark.availability;
 
 import com.nam.model.CarPark;
 import com.nam.model.dto.CarParkAvailabilityResponse;
+import com.nam.utils.DateTimeUtils;
 import com.nam.utils.EntityHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Component
-public class CarParkProviderImpl implements CarParkProvider {
+public class CarParkAvailabilityProviderImpl implements CarParkAvailabilityProvider {
 
     private static final String API_URL = "https://api.data.gov.sg/v1/transport/carpark-availability";
 
@@ -22,13 +23,13 @@ public class CarParkProviderImpl implements CarParkProvider {
     private CarParkSyncUpSession carParkSyncUpSession;
 
     @Override
-    public void poll() {
+    public synchronized void poll() {
         CarParkAvailabilityResponse response = restTemplate.getForObject(API_URL, CarParkAvailabilityResponse.class);
         boolean responseNotEmpty = response != null && response.getItems() != null && !response.getItems().isEmpty();
 
         if (responseNotEmpty) {
             CarParkAvailabilityResponse.Item mainItemResponse = response.getItems().get(0);
-            LocalDateTime currentTimestamp = LocalDateTime.parse(mainItemResponse.getTimestamp());
+            LocalDateTime currentTimestamp = DateTimeUtils.parseDateTimeWithZone(mainItemResponse.getTimestamp());
 
             if (carParkSyncUpSession.shouldSyncUp(currentTimestamp)) {
                 for (CarParkAvailabilityResponse.CarParkData data : mainItemResponse.getCarparkData()) {

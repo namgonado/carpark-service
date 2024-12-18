@@ -15,4 +15,10 @@ public class DateTimeUtils {
     public static String getDateTimeAsString(LocalDateTime dateTime) {
         return dateTime.format(FORMATTER);
     }
+
+    public static LocalDateTime parseDateTimeWithZone(String dateTimeStr) {
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+        LocalDateTime localDateTime = LocalDateTime.parse(dateTimeStr, formatter);
+        return localDateTime;
+    }
 }
