@@ -2,7 +2,7 @@ package com.nam.provider.carpark.availability;
 
 import com.nam.model.CarPark;
 import com.nam.provider.carpark.availability.cache.CarParkSyncUpCache;
-import com.nam.provider.carpark.availability.cache.SyncUpCacheFactory;
+import com.nam.provider.carpark.availability.cache.factory.SyncUpCacheFactory;
 import com.nam.repository.CarParkRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +13,7 @@ import org.mockito.MockitoAnnotations;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static com.nam.provider.carpark.availability.CarParkSyncUpSessionImpl.CACHE_TIMESTAMP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
@@ -47,17 +48,19 @@ class CarParkSyncUpSessionImplTest {
 
     @Test
     void testShouldUpdate() {
-        LocalDateTime now = LocalDateTime.now();
-        when(cache.getUpdateTime("BM29")).thenReturn(now.minusDays(1));
-        assertTrue(carParkSyncUpSession.shouldUpdate("BM29", now));
+        LocalDateTime currentUpdateTime = LocalDateTime.now();
+        LocalDateTime cacheUpdateTime = currentUpdateTime.minusDays(1);
+        when(cache.getUpdateTime("BM29")).thenReturn(cacheUpdateTime);
+
+        assertTrue(carParkSyncUpSession.shouldUpdate("BM29", currentUpdateTime));
         verify(cache, times(1)).getUpdateTime("BM29");
     }
 
     @Test
     void testUpdateCache() {
-        LocalDateTime now = LocalDateTime.now();
-        carParkSyncUpSession.updateCache("BM29", now);
-        verify(cache, times(1)).putUpdateTime("BM29", now);
+        LocalDateTime currentUpdate = LocalDateTime.now();
+        carParkSyncUpSession.updateCache("BM29", currentUpdate);
+        verify(cache, times(1)).putUpdateTime("BM29", currentUpdate);
     }
 
     @Test
@@ -78,15 +81,15 @@ class CarParkSyncUpSessionImplTest {
     @Test
     void testShouldSyncUp() {
         LocalDateTime now = LocalDateTime.now();
-        when(cache.getUpdateTime("CACHE_TIMESTAMP")).thenReturn(now.minusDays(1));
+        when(cache.getUpdateTime(CACHE_TIMESTAMP)).thenReturn(now.minusDays(1));
         assertTrue(carParkSyncUpSession.shouldSyncUp(now));
-        verify(cache, times(1)).getUpdateTime("CACHE_TIMESTAMP");
+        verify(cache, times(1)).getUpdateTime(CACHE_TIMESTAMP);
     }
 
     @Test
     void testUpdateTimestamp() {
-        LocalDateTime now = LocalDateTime.now();
-        carParkSyncUpSession.updateTimestamp(now);
-        verify(cache, times(1)).putUpdateTime("CACHE_TIMESTAMP", now);
+        LocalDateTime latestTimeStamp = LocalDateTime.now();
+        carParkSyncUpSession.updateTimestamp(latestTimeStamp);
+        verify(cache, times(1)).putUpdateTime(CACHE_TIMESTAMP, latestTimeStamp);
     }
 }

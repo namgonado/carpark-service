@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class InMemoryMapSyncUpCache implements CarParkSyncUpCache {
     private static final int INITIAL_PAGE = 0;
-    private static final int PAGE_SIZE = 100;
+    private static final int PAGE_SIZE = 1000;
     private final Map<String, LocalDateTime> cache = new ConcurrentHashMap<>();
 
     @Autowired
@@ -27,11 +27,17 @@ public class InMemoryMapSyncUpCache implements CarParkSyncUpCache {
         loadCarParksIntoCache();
     }
 
-    private void loadCarParksIntoCache() {
+    private synchronized void loadCarParksIntoCache() {
         int page = INITIAL_PAGE;
         Page<CarPark> carParkPage;
 
         do {
+            /**
+             * For large databases with millions of records, define a custom query to load only the required fields:
+             * - carParkNumber
+             * - updateDateTime
+             * This reduces the amount of data retrieved during bulk queries.
+             */
             carParkPage = carParkRepository.findAll(PageRequest.of(page, PAGE_SIZE));
             carParkPage
                     .forEach(carPark -> cache.put(carPark.getCarparkNumber(), carPark.getUpdateDatetime()));

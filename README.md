@@ -1,39 +1,38 @@
-# cms-media-service
-Service for news and podcast management.
+# carpark-service
+Service to locate the nearest car park with vacant parking slots
 
 ## Local installation
 1. Need to be installed:
     - Java 17
-    - Docker Engine 19.03.0+ (Or latest, because we are using [Docker compose 3.8](https://docs.docker.com/compose/compose-file/compose-versioning/))
+    - Docker Engine 27.2+ or later (compose 2.29)
     - Maven 3.1+
-    - Redis 7
-    - Postgres 15
-2. To run project you have to set up the following environment variables:
-    - Postgres database connection - refer to application-dev.yml for more information
-    - Redis connection - refer to application-dev.yml for more information
-    - AWS S3 connection - refer to application-dev.yml for more information
-3. By default, server is running on [localhost:8087](http://localhost:8087)
-4. Swagger is available by [/swagger-ui.html](http://localhost:8087/swagger-ui.html) path
-
-## Test
-To be implemented...
 
 ## Build
 To build the project, execute the following maven goal:
-1. Clone project https://github.com/Robustrade/kulu-parent
-2. Install to you local parent bom
-   ```$xslt
-   mvn clean install
+1. Clone project 
+   ``` 
+   git clone git@github.com:namgonado/carpark-service.git
    ```
-3. Via terminal, execute the following scripts:
-   <br/>**Development environment without tests**:
+2. Open a terminal, navigate to the project's root folder, and execute the following command to compile the Spring Boot application.
    ```$xslt
-   mvn clean install -Dmaven.test.skip=true
+   mvn clean package -DskipTests
    ```
-     
-## Info
-1. Please read application-dev.yml for possible values.
-2. Find the environment variable values from [Contacts](#contacts).
+3.  In the project root folder, execute the following command to deploy the Docker containers.
+   ```$xslt
+   docker compose -f docker-compose.yml up --detach
+   ```
+4. Wait for the Docker deployment to complete successfully. Check the status and logs of the following containers:
+   * carpark-service
+   * redis-for-carpark
+   * postgres-for-carpark
+5. By default, the server can be accessed at [localhost:8088](http://localhost:8088)
+
+## Feature and Configuration
+Car park availability information is synchronized with an external data source using the CarParkAvailabilityProvider. This provider utilizes two caching components to enhance the inspection process for data update status:
+
+In-memory cache: Used for a standalone service.
+Redis global cache: Used when scaling up across multiple services.
+To switch between these caching components, set the appropriate value for provider.syncup.cache in the application.yml configuration file.
 
 ## Contacts
-- Solution Architect [nam le-hong](nam.lehong@morsoftware.com)
+- Solution Architect [nam le-hong](namgonado@gmail.com)

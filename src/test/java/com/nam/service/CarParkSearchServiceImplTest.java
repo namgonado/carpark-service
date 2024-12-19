@@ -42,6 +42,7 @@ public class CarParkSearchServiceImplTest {
     public void setUp() throws IOException {
         MockitoAnnotations.openMocks(this);
 
+        //Load car park data from csv
         carParkGeoProvider = new CarParkGeoProviderImpl();
         Resource resource = new ClassPathResource("carParkData/HDBCarparkInformation.csv");
         when(applicationContext.getResource("classpath:carParkData/HDBCarparkInformation.csv")).thenReturn(resource);
@@ -50,7 +51,7 @@ public class CarParkSearchServiceImplTest {
 
         ReflectionTestUtils.setField(carParkSearchService, "carParkGeoProvider", carParkGeoProvider);
 
-        // Mock CarPark data
+        // Mock CarPark data in repository
         CarPark carPark1 = new CarPark();
         carPark1.setCarparkNumber("AR2M");
         carPark1.setCarParkInfos(Arrays.asList(new CarParkInfo(1L, "A", 100, 50, carPark1)));

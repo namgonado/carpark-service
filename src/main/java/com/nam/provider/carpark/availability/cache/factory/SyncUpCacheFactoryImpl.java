@@ -1,5 +1,6 @@
-package com.nam.provider.carpark.availability.cache;
+package com.nam.provider.carpark.availability.cache.factory;
 
+import com.nam.provider.carpark.availability.cache.CarParkSyncUpCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -9,7 +10,7 @@ import java.util.List;
 @Component
 public class SyncUpCacheFactoryImpl implements SyncUpCacheFactory {
 
-    @Value("${provider.syncup.cache:IN_MEMORY}")
+    @Value("${carpark.provider.availability.syncup.cache:IN_MEMORY}")
     private String configuredType;
 
     @Autowired

@@ -1,6 +1,7 @@
 package com.nam.utils;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class DateTimeUtils {
@@ -12,6 +13,10 @@ public class DateTimeUtils {
         return now.format(FORMATTER);
     }
 
+    public static String nowAsDateTimeWithZoneString() {
+        OffsetDateTime now = OffsetDateTime.now();
+        return now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+    }
     public static String getDateTimeAsString(LocalDateTime dateTime) {
         return dateTime.format(FORMATTER);
     }
@@ -21,4 +26,5 @@ public class DateTimeUtils {
         LocalDateTime localDateTime = LocalDateTime.parse(dateTimeStr, formatter);
         return localDateTime;
     }
+
 }

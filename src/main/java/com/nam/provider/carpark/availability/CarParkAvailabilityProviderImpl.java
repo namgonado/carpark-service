@@ -4,7 +4,10 @@ import com.nam.model.CarPark;
 import com.nam.model.dto.CarParkAvailabilityResponse;
 import com.nam.utils.DateTimeUtils;
 import com.nam.utils.EntityHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -13,9 +16,10 @@ import java.util.Optional;
 
 @Component
 public class CarParkAvailabilityProviderImpl implements CarParkAvailabilityProvider {
+    private static final Logger logger = LoggerFactory.getLogger(CarParkAvailabilityProviderImpl.class);
 
-    private static final String API_URL = "https://api.data.gov.sg/v1/transport/carpark-availability";
-
+    @Value("${carpark.provider.availability.external-source}")
+    private String externalUrl;
     @Autowired
     private RestTemplate restTemplate;
 
@@ -24,7 +28,7 @@ public class CarParkAvailabilityProviderImpl implements CarParkAvailabilityProvi
 
     @Override
     public synchronized void poll() {
-        CarParkAvailabilityResponse response = restTemplate.getForObject(API_URL, CarParkAvailabilityResponse.class);
+        CarParkAvailabilityResponse response = restTemplate.getForObject(externalUrl, CarParkAvailabilityResponse.class);
         boolean responseNotEmpty = response != null && response.getItems() != null && !response.getItems().isEmpty();
 
         if (responseNotEmpty) {
@@ -32,19 +36,28 @@ public class CarParkAvailabilityProviderImpl implements CarParkAvailabilityProvi
             LocalDateTime currentTimestamp = DateTimeUtils.parseDateTimeWithZone(mainItemResponse.getTimestamp());
 
             if (carParkSyncUpSession.shouldSyncUp(currentTimestamp)) {
+                logger.info("Timestamp has changed to {}, start to sync up with local database", currentTimestamp);
+
+                int updatedCount = 0;
+                int addedCount = 0;
+
                 for (CarParkAvailabilityResponse.CarParkData data : mainItemResponse.getCarparkData()) {
                     LocalDateTime updateDatetime = LocalDateTime.parse(data.getUpdateDatetime());
                     String carparkNumber = data.getCarparkNumber();
 
                     if (carParkSyncUpSession.exists(carparkNumber) && carParkSyncUpSession.shouldUpdate(carparkNumber, updateDatetime)) {
                         updateChangedCarPark(carparkNumber, data);
+                        updatedCount++;
                     } else if (!carParkSyncUpSession.exists(carparkNumber)) {
                         addNewCarPark(data);
+                        addedCount++;
                     }
 
                     carParkSyncUpSession.updateCache(carparkNumber, updateDatetime);
                 }
                 carParkSyncUpSession.updateTimestamp(currentTimestamp);
+                logger.info("Total number of car park updated: {}", updatedCount);
+                logger.info("Total number of car park added: {}", addedCount);
             }
         }
     }

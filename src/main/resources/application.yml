@@ -59,3 +59,10 @@ fix:
 #            misfireThreshold: 60000
 #            clusterCheckinInterval: 5000
 #            isClustered: true
+
+carpark:
+  provider:
+    availability:
+      external-source: 'https://api.data.gov.sg/v1/transport/carpark-availability'
+      syncup:
+        cache: IN_MEMORY #possible value: IN_MEMORY, GLOBAL_REDIS

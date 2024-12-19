@@ -32,7 +32,7 @@ public class CarParkGeoProviderImpl implements CarParkGeoProvider {
 
     @EventListener(ContextRefreshedEvent.class)
     public void init() throws IOException {
-        Resource resource =  applicationContext.getResource("classpath:" + CSV_FILE_PATH);
+        Resource resource = applicationContext.getResource("classpath:" + CSV_FILE_PATH);
         try (Reader reader = new InputStreamReader(resource.getInputStream());
              CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader())) {
 

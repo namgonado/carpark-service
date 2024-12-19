@@ -2,7 +2,7 @@ package com.nam.provider.carpark.availability;
 
 import com.nam.model.CarPark;
 import com.nam.provider.carpark.availability.cache.CarParkSyncUpCache;
-import com.nam.provider.carpark.availability.cache.SyncUpCacheFactory;
+import com.nam.provider.carpark.availability.cache.factory.SyncUpCacheFactory;
 import com.nam.repository.CarParkRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Service
 public class CarParkSyncUpSessionImpl implements CarParkSyncUpSession {
-    private static final String CACHE_TIMESTAMP = "CACHE_TIMESTAMP";
+    public static final String CACHE_TIMESTAMP = "CACHE_TIMESTAMP";
     @Autowired
     private CarParkRepository carParkRepository;
 
