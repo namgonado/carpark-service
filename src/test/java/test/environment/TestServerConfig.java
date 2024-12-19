@@ -1,4 +1,4 @@
-package testEnvironment;
+package test.environment;
 
 import com.redis.testcontainers.RedisContainer;
 import org.jetbrains.annotations.NotNull;
@@ -7,7 +7,6 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
