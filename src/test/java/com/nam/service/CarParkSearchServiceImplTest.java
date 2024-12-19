@@ -52,15 +52,15 @@ public class CarParkSearchServiceImplTest {
 
         // Mock CarPark data
         CarPark carPark1 = new CarPark();
-        carPark1.setCarparkNumber("HLM1");
+        carPark1.setCarparkNumber("AR2M");
         carPark1.setCarParkInfos(Arrays.asList(new CarParkInfo(1L, "A", 100, 50, carPark1)));
 
         CarPark carPark2 = new CarPark();
-        carPark2.setCarparkNumber("HLM2");
+        carPark2.setCarparkNumber("A24");
         carPark2.setCarParkInfos(Arrays.asList(new CarParkInfo(10L, "C", 200, 150, carPark2)));
 
-        when(carParkRepository.findById("HLM1")).thenReturn(Optional.of(carPark1));
-        when(carParkRepository.findById("HLM2")).thenReturn(Optional.of(carPark2));
+        when(carParkRepository.findById("AR2M")).thenReturn(Optional.of(carPark1));
+        when(carParkRepository.findById("A24")).thenReturn(Optional.of(carPark2));
     }
 
     @Test
@@ -68,7 +68,7 @@ public class CarParkSearchServiceImplTest {
         double latitude = 1.37326;
         double longitude = 103.897;
         int page = 0;
-        int perPage = 2;
+        int perPage = 10;
 
         List<SearchCarParkResponse> carParks = carParkSearchService.findNearestCarParks(latitude, longitude, page, perPage);
 

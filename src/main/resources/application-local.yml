@@ -1,0 +1,6 @@
+spring:
+  data:
+    redis:
+      host: ${REDIS_URL:localhost}
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:5432/carpark?currentSchema=carpark&serverTimezone=UTC

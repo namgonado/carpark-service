@@ -1,42 +1,42 @@
 version: "3.8"
 
 services:
-  spring-boot-app:
+  carpark-service:
     build:
       context: .
       args:
-        JAR_FILE: ./target/lottery-service-0.0.1-SNAPSHOT.jar
-    container_name: lottery-service
+        JAR_FILE: ./target/car-park-0.0.1-SNAPSHOT.jar
+    container_name: carpark-service
     ports:
-      - "${SERVER_EXTERNAL_PORT}:${SERVER_PORT}"
+      - 8088:8088
+    networks:
+    - carpark-network
   redis:
-    container_name: redis
-    image: redis:7.0.11-alpine@sha256:e20345b7ec692815860c07f0209eb0465687b0c28cd85df412811ae1ac7b653e
+    container_name: redis-for-carpark
+    image: redis:7.0.11-alpine
     ports:
-      - '${REDIS_PORT}:6379'
-    command: --requirepass ${REDIS_PASSWORD}
+      - '6379:6379'
+    #command: --requirepass ${REDIS_PASSWORD}
     volumes:
       - redis:/data
+    networks:
+      - carpark-network
   postgres:
     image: postgres:15.3-alpine
     restart: 'unless-stopped'
-    container_name: postgres
+    container_name: postgres-for-carpark
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "5432:5432"
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_SCHEMA: ${POSTGRES_SCHEMA}
-  active-mq:
-    #image: apache/activemq-artemis:latest-alpine
-    image: apache/activemq-artemis:2.30.0-alpine
-    ports:
-      - "61616:61616"
-      - "8161:8161"
-    environment:
-      ARTEMIS_USER: 'admin'
-      ARTEMIS_PASSWORD: 'admin'
+      POSTGRES_DB: carpark
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: Rootadmin1
+      POSTGRES_SCHEMA: carpark
+    networks:
+      - carpark-network
 volumes:
   redis:
     driver: local
+networks:
+  carpark-network:
+    driver: bridge
