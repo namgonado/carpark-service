@@ -15,8 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class InMemoryMapSyncUpCache implements CarParkSyncUpCache {
-    private static final int INITIAL_PAGE = 0;
-    private static final int PAGE_SIZE = 1000;
+    public static final int INITIAL_PAGE = 0;
+    public static final int PAGE_SIZE = 1000;
     private final Map<String, LocalDateTime> cache = new ConcurrentHashMap<>();
 
     @Autowired

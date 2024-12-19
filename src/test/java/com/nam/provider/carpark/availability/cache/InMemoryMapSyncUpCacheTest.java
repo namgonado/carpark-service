@@ -19,13 +19,14 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.nam.provider.carpark.availability.cache.InMemoryMapSyncUpCache.PAGE_SIZE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class InMemoryMapSyncUpCacheTest {
 
     @InjectMocks
-    private InMemoryMapSyncUpCache inMemoryMapSyncUpCache;
+    private InMemoryMapSyncUpCache inMemoryMapSyncUpCache = new InMemoryMapSyncUpCache();
 
     @Mock
     private CarParkRepository carParkRepository;
@@ -45,8 +46,8 @@ class InMemoryMapSyncUpCacheTest {
         }).toList();
 
         Page<CarPark> carParkPage = new PageImpl<>(carParks);
-        when(carParkRepository.findAll(PageRequest.of(0, 100))).thenReturn(carParkPage);
-        when(carParkRepository.findAll(PageRequest.of(1, 100))).thenReturn(Page.empty());
+        when(carParkRepository.findAll(PageRequest.of(0, PAGE_SIZE))).thenReturn(carParkPage);
+        when(carParkRepository.findAll(PageRequest.of(1, PAGE_SIZE))).thenReturn(Page.empty());
 
         inMemoryMapSyncUpCache.init();
     }
