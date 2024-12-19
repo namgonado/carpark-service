@@ -11,21 +11,32 @@ import org.apache.commons.csv.CSVRecord;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class EntityHelper {
 
     public static void populateCarParkInfo(CarPark carPark, CarParkAvailabilityResponse.CarParkData data) {
         carPark.setUpdateDatetime(LocalDateTime.parse(data.getUpdateDatetime()));
-        List<CarParkInfo> carParkInfos = new ArrayList<>();
-        for (CarParkAvailabilityResponse.CarParkInfo info : data.getCarparkInfo()) {
-            CarParkInfo carParkInfo = new CarParkInfo();
-            carParkInfo.setLotType(info.getLotType());
-            carParkInfo.setTotalLots(Integer.parseInt(info.getTotalLots()));
-            carParkInfo.setLotsAvailable(Integer.parseInt(info.getLotsAvailable()));
-            carParkInfo.setCarPark(carPark);
-            carParkInfos.add(carParkInfo);
+        List<CarParkInfo> existingInfos = carPark.getCarParkInfos();
+        Map<String, CarParkInfo> existingInfoMap = existingInfos.stream()
+                .collect(Collectors.toMap(CarParkInfo::getLotType, info -> info));
+
+        for (CarParkAvailabilityResponse.CarParkInfo newInfo : data.getCarparkInfo()) {
+            CarParkInfo existingInfo = existingInfoMap.get(newInfo.getLotType());
+            if (existingInfo != null) {
+                existingInfo.setTotalLots(Integer.parseInt(newInfo.getTotalLots()));
+                existingInfo.setLotsAvailable(Integer.parseInt(newInfo.getLotsAvailable()));
+            } else {
+                CarParkInfo carParkInfo = new CarParkInfo();
+                carParkInfo.setLotType(newInfo.getLotType());
+                carParkInfo.setTotalLots(Integer.parseInt(newInfo.getTotalLots()));
+                carParkInfo.setLotsAvailable(Integer.parseInt(newInfo.getLotsAvailable()));
+                carParkInfo.setCarPark(carPark);
+                existingInfos.add(carParkInfo);
+            }
         }
-        carPark.setCarParkInfos(carParkInfos);
+        carPark.setCarParkInfos(existingInfos);
     }
 
     public static CarPark createNewCarPark(CarParkAvailabilityResponse.CarParkData data) {

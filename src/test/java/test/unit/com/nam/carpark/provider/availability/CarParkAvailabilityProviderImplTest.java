@@ -5,6 +5,7 @@ import com.nam.carpark.model.CarPark;
 import com.nam.carpark.model.dto.CarParkAvailabilityResponse;
 import com.nam.carpark.provider.availability.CarParkAvailabilityProviderImpl;
 import com.nam.carpark.provider.availability.CarParkSyncUpSession;
+import com.nam.carpark.repository.CarParkRepository;
 import com.nam.carpark.utils.DateTimeUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,8 @@ class CarParkAvailabilityProviderImplTest {
     @Mock
     private CarParkSyncUpSession carParkSyncUpSession;
 
+    @Mock
+    private CarParkRepository carParkRepository;
     @InjectMocks
     private CarParkAvailabilityProviderImpl carParkProvider;
 
@@ -56,8 +59,10 @@ class CarParkAvailabilityProviderImplTest {
         //GIVEN
         when(restTemplate.getForObject(anyString(), eq(CarParkAvailabilityResponse.class))).thenReturn(response);
         when(carParkSyncUpSession.shouldSyncUp(any(LocalDateTime.class))).thenReturn(true);
-        when(carParkSyncUpSession.shouldUpdate(anyString(), any(LocalDateTime.class))).thenReturn(true);
         when(carParkSyncUpSession.getCarPark(anyString())).thenReturn(Optional.of(new CarPark()));
+
+        //BM29 need to be updated, others need to be added
+        when(carParkSyncUpSession.shouldUpdate(anyString(), any(LocalDateTime.class))).thenReturn(true);
         when(carParkSyncUpSession.exists(anyString())).thenAnswer(invocation -> {
             String carParkNumber = invocation.getArgument(0);
             return "BM29".equals(carParkNumber);
@@ -67,7 +72,7 @@ class CarParkAvailabilityProviderImplTest {
         carParkProvider.poll();
 
         //THEN
-        verify(carParkSyncUpSession, times(13)).saveCarPark(any(CarPark.class));
+        verify(carParkRepository, times(2)).saveAll(any(Iterable.class));
         verify(carParkSyncUpSession, times(1)).updateTimestamp(any(LocalDateTime.class));
     }
 
@@ -92,17 +97,17 @@ class CarParkAvailabilityProviderImplTest {
         });
         // Use doAnswer to capture the argument and add it to the list
         doAnswer(invocation -> {
-            CarPark carPark = invocation.getArgument(0);
-            savedCarParks.add(carPark);
+            List<CarPark> savedCarPacks = invocation.getArgument(0);
+            savedCarParks.addAll(savedCarPacks);
             return null;
-        }).when(carParkSyncUpSession).saveCarPark(any(CarPark.class));
+        }).when(carParkRepository).saveAll(any(Iterable.class));
 
         //WHEN
         carParkProvider.poll();
 
         //THEN
         ArgumentCaptor<CarPark> carParkCaptor = ArgumentCaptor.forClass(CarPark.class);
-        verify(carParkSyncUpSession, times(1)).saveCarPark(any(CarPark.class));
+        verify(carParkRepository, times(1)).saveAll(any(Iterable.class));
         verify(carParkSyncUpSession, times(1)).updateTimestamp(any(LocalDateTime.class));
 
         assertEquals(1, savedCarParks.size());
