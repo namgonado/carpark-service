@@ -7,15 +7,14 @@ Service to locate the nearest car park with vacant parking slots
     - Docker Engine 27.2+ or later (compose 2.29)
     - Maven 3.1+
 
-# Carpark Service
-
 ## Build and Deploy Instructions
 
 Follow these steps to build and deploy the Carpark Service project:
 
-1. **Clone the Project**: Clone the repository to your local machine:
+1. **Clone the Project**: Clone the repository to your local machine, checkout master branch:
    ```bash
    git clone git@github.com:namgonado/carpark-service.git
+   git checkout master
    ```
 
 2. **Compile the Spring Boot Application**: Navigate to the project's root folder and compile the project using one of the following options:

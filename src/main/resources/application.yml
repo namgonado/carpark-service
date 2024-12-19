@@ -64,6 +64,6 @@ carpark:
       external-source: 'https://api.data.gov.sg/v1/transport/carpark-availability'
       syncup:
         cron-job:
-          enable: false  # Set true to enable cron job polling
-          interval: 60     # second
+          enable: true   # Set true to enable cron job polling
+          interval: 60   # second
         cache: IN_MEMORY # possible value: IN_MEMORY, GLOBAL_REDIS
