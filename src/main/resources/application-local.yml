@@ -4,3 +4,12 @@ spring:
       host: ${REDIS_URL:localhost}
   datasource:
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:5432/carpark?currentSchema=carpark&serverTimezone=UTC
+
+carpark:
+  provider:
+    availability:
+      syncup:
+        cron-job:
+          enable: true  # Set true to enable cron job polling
+          interval: 20     # second
+        cache: GLOBAL_REDIS # possible value: IN_MEMORY, GLOBAL_REDIS

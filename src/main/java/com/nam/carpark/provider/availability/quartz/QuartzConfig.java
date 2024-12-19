@@ -1,13 +1,15 @@
-package com.nam.carpark.configuration;
+package com.nam.carpark.provider.availability.quartz;
 
-import com.nam.carpark.service.quartz.CarParkInfoSyncJob;
 import org.quartz.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class QuartzConfig {
-
+    @Value("${carpark.provider.availability.syncup.cron-job.interval:20}")
+    private int intervalSecond;
     @Bean
     public JobDetail carParkInfoJobDetail() {
         return JobBuilder.newJob(CarParkInfoSyncJob.class)
@@ -16,16 +18,18 @@ public class QuartzConfig {
                 .build();
     }
 
-/*    @Bean
+    @Bean
+    @ConditionalOnProperty(name = "carpark.provider.availability.syncup.cron-job.enable", havingValue = "true")
     public Trigger carParkInfoJobTrigger() {
         SimpleScheduleBuilder scheduleBuilder = SimpleScheduleBuilder.simpleSchedule()
-                .withIntervalInMinutes(10) // Adjust the interval as needed
+                .withIntervalInSeconds(intervalSecond) // Adjust the interval as needed
                 .repeatForever();
 
         return TriggerBuilder.newTrigger()
                 .forJob(carParkInfoJobDetail())
-                .withIdentity("carParkInfoTrigger")
+                .withIdentity("carParkSyncupTrigger")
+                .startNow()
                 .withSchedule(scheduleBuilder)
                 .build();
-    }*/
+    }
 }

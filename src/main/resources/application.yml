@@ -22,8 +22,8 @@ spring:
     redis:
       host: ${REDIS_URL:redis}
       port: ${REDIS_PORT:6379}
-      username: ${REDIS_USERNAME}
-      password: ${REDIS_PASSWORD}
+      #username: ${REDIS_USERNAME}
+      #password: ${REDIS_PASSWORD}
       database: ${REDIS_DB_INDEX:0}
       global_ttl_minutes: 30 # 5 Seconds
       timeout: 5000 # 5 Seconds
@@ -40,8 +40,6 @@ spring:
     locations: classpath:db/migration
     schemas:
       - ${POSTGRES_SCHEMA:carpark}
-fix:
-  flyway:
 
 #  quartz:
 #    job-store-type: jdbc
@@ -53,7 +51,7 @@ fix:
 #          scheduler:
 #            instanceId: AUTO
 #          jobStore:
-#            tablePrefix: ${POSTGRES_SCHEMA}.qrtz_
+#            tablePrefix: ${POSTGRES_SCHEMA:carpark}.qrtz_
 #            class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
 #            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
 #            misfireThreshold: 60000
@@ -65,4 +63,7 @@ carpark:
     availability:
       external-source: 'https://api.data.gov.sg/v1/transport/carpark-availability'
       syncup:
-        cache: IN_MEMORY #possible value: IN_MEMORY, GLOBAL_REDIS
+        cron-job:
+          enable: false  # Set true to enable cron job polling
+          interval: 60     # second
+        cache: IN_MEMORY # possible value: IN_MEMORY, GLOBAL_REDIS

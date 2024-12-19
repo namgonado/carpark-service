@@ -68,6 +68,8 @@ public class CarParkAvailabilityProviderImpl implements CarParkAvailabilityProvi
             CarPark carPark = optionalCarPark.get();
             EntityHelper.populateCarParkInfo(carPark, data);
             carParkSyncUpSession.saveCarPark(carPark);
+        }else {
+            throw new IllegalStateException("Car park with number " + carparkNumber + " does not exist for update.");
         }
     }
 

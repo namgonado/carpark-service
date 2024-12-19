@@ -1,4 +1,4 @@
-package com.nam.carpark.service.quartz;
+package com.nam.carpark.provider.availability.quartz;
 
 import com.nam.carpark.provider.availability.CarParkAvailabilityProvider;
 import org.quartz.Job;

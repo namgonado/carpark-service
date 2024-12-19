@@ -33,6 +33,8 @@ public class CarParkGeoProviderImpl implements CarParkGeoProvider {
     @EventListener(ContextRefreshedEvent.class)
     public void init() throws IOException {
         Resource resource = applicationContext.getResource("classpath:" + CSV_FILE_PATH);
+
+        logger.info("Start reading and parsing CSV file: {}", CSV_FILE_PATH);
         try (Reader reader = new InputStreamReader(resource.getInputStream());
              CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader())) {
 
@@ -44,6 +46,7 @@ public class CarParkGeoProviderImpl implements CarParkGeoProvider {
             logger.error("Error parsing CSV file: {}", CSV_FILE_PATH, e);
             throw e;
         }
+        logger.info("Finished parsing CSV file: {}. Number of records parsed: {}", CSV_FILE_PATH, carParkGeoMap.size());
     }
 
     @Override
