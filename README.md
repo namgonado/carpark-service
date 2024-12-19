@@ -34,16 +34,16 @@ Follow these steps to build and deploy the Carpark Service project:
    ```
 
 4. **Verify Deployment**: Wait for the Docker deployment to complete successfully. Then, check the status and logs of the following containers:
-   - `carpark-service`
-   - `redis-for-carpark`
-   - `postgres-for-carpark`
+   - carpark-service
+   - redis-for-carpark
+   - postgres-for-carpark
 
    Use the command below to view logs for a specific container (e.g., `carpark-service`):
    ```bash
    docker logs carpark-service
    ```
 
-5. **Refresh the Deployment**: If you need to refresh the deployment, stop and remove all containers, networks, and volumes created by `docker compose`:
+5. **Refresh the Deployment**: If you need to refresh the deployment, stop and remove all containers, networks, and volumes created by docker compose:
    ```bash
    docker compose -f docker-compose.yml down
    ```
@@ -54,7 +54,44 @@ Follow these steps to build and deploy the Carpark Service project:
 
 6. **Access the Server**: By default, the server is available at:
    [http://localhost:8088](http://localhost:8088)
-## Feature and Configuration
+
+## Configuration
+
+The application is configured using properties in the `application.yaml` file. Refer to the file to update properties, then rebuild the application and redeploy the containers.
+
+```yaml
+carpark:
+  provider:
+    availability:
+      external-source: 'https://api.data.gov.sg/v1/transport/carpark-availability'
+      syncup:
+        cron-job:
+          enable: false  # Set to true to enable cron job polling
+          interval: 60    # Interval in seconds
+        cache: IN_MEMORY  # Possible values: IN_MEMORY, GLOBAL_REDIS
+```
+**Key Configuration Properties**
+
+- `external-source`: The URL for the external car park availability data source.
+- `syncup.cron-job.enable`: Set to `true` to enable periodic polling, otherwise `false`.
+- `syncup.cron-job.interval`: Defines the polling interval in seconds.
+- `cache`: Defines the cache mechanism to use. Options are:
+    - `IN_MEMORY`: Cache data in memory.
+    - `GLOBAL_REDIS`: Cache data in a global Redis instance.
+## APIs
+1. Trigger Car Park Polling (Sync Up)
+Manually trigger the car park polling sync up by sending a POST request to:
+
+```http
+POST http://localhost:8088/carparks/sync
+```
+2. Search for Nearest Car Park
+   Search for the nearest car park location by providing latitude and longitude parameters in a GET request:
+
+```http
+GET http://localhost:8088/carparks/nearest?latitude=1.347643&longitude=103.957792&page=0&per_page=5
+```
+## Feature and Architect
 ### Modularization
 - The application is modularized to separate functionality into distinct packages:
    - `CarParkGeoProvider`: Loads geographical information from a CSV file.
