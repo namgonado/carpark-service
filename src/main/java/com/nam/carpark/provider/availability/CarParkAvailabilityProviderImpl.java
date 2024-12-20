@@ -38,48 +38,51 @@ public class CarParkAvailabilityProviderImpl implements CarParkAvailabilityProvi
     @Override
     @Transactional
     public synchronized void poll() {
-        CarParkAvailabilityResponse response = restTemplate.getForObject(externalUrl, CarParkAvailabilityResponse.class);
-        boolean responseNotEmpty = response != null && response.getItems() != null && !response.getItems().isEmpty();
-
-        if (responseNotEmpty) {
+        CarParkAvailabilityResponse response = requestExternalData();
+        if (response != null && response.getItems() != null && !response.getItems().isEmpty()) {
             CarParkAvailabilityResponse.Item mainItemResponse = response.getItems().get(0);
             LocalDateTime currentTimestamp = DateTimeUtils.parseDateTimeWithZone(mainItemResponse.getTimestamp());
 
             if (carParkSyncUpSession.shouldSyncUp(currentTimestamp)) {
                 logger.info("Timestamp has changed to {}, start to sync up with local database", currentTimestamp);
-                int updatedCount = 0;
-                int addedCount = 0;
-
-                // Sort the carparkDataList by updateDatetime
-                List<CarParkData> carparkDataList = mainItemResponse.getCarparkData()
-                        .stream()
-                        .sorted(Comparator.comparing(data -> LocalDateTime.parse(data.getUpdateDatetime())))
-                        .collect(Collectors.toList());
-
-                for (int i = 0; i < carparkDataList.size(); i += BATCH_SIZE) {
-                    int end = Math.min(i + BATCH_SIZE, carparkDataList.size());
-                    List<CarParkData> dataSublist = carparkDataList.subList(i, end);
-
-                    Map<String, List<CarParkData>> filterOutLists;
-                    filterOutLists = filterOutModifyListsAndUpdateCache(dataSublist);
-
-                    List<CarParkData> toUpdate = filterOutLists.get(UPDATE_LIST);
-                    List<CarParkData> toAdd = filterOutLists.get(NEW_LIST);
-
-                    updateChangedCarParkInBulk(toUpdate);
-                    addNewCarParkInBulk(toAdd);
-
-                    updatedCount += toUpdate.size();
-                    addedCount += toAdd.size();
-                }
-
+                processInBatch(mainItemResponse.getCarparkData());
                 carParkSyncUpSession.updateTimestamp(currentTimestamp);
-                logger.info("Total number of car park updated: {}", updatedCount);
-                logger.info("Total number of car park added: {}", addedCount);
             } else {
                 logger.info("Timestamp {} has not changed, no sync up will happen", currentTimestamp);
             }
         }
+    }
+
+    private CarParkAvailabilityResponse requestExternalData() {
+        return restTemplate.getForObject(externalUrl, CarParkAvailabilityResponse.class);
+    }
+
+    private void processInBatch(List<CarParkData> carparkDataList) {
+        int updatedCount = 0;
+        int addedCount = 0;
+
+        List<CarParkData> sortedCarparkDataList = carparkDataList.stream()
+                .sorted(Comparator.comparing(data -> LocalDateTime.parse(data.getUpdateDatetime())))
+                .collect(Collectors.toList());
+
+        for (int i = 0; i < sortedCarparkDataList.size(); i += BATCH_SIZE) {
+            int end = Math.min(i + BATCH_SIZE, sortedCarparkDataList.size());
+            List<CarParkData> dataSublist = sortedCarparkDataList.subList(i, end);
+
+            Map<String, List<CarParkData>> filterOutLists = filterOutModifyListsAndUpdateCache(dataSublist);
+
+            List<CarParkData> toUpdate = filterOutLists.get(UPDATE_LIST);
+            List<CarParkData> toAdd = filterOutLists.get(NEW_LIST);
+
+            updateChangedCarParkInBulk(toUpdate);
+            addNewCarParkInBulk(toAdd);
+
+            updatedCount += toUpdate.size();
+            addedCount += toAdd.size();
+        }
+
+        logger.info("Total number of car park updated: {}", updatedCount);
+        logger.info("Total number of car park added: {}", addedCount);
     }
 
     private Map<String, List<CarParkData>> filterOutModifyListsAndUpdateCache(List<CarParkData> carParkSublist) {
