@@ -49,7 +49,7 @@ carpark:
       syncup:
         cron-job:
           enable: true   # Set true to enable cron job polling
-          interval: 60   # second
+          interval: 20   # second
         cache: IN_MEMORY # possible value: IN_MEMORY, GLOBAL_REDIS
 
 #  quartz:
