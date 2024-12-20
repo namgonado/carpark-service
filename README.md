@@ -82,11 +82,9 @@ carpark:
 ### Deployment properties
 The .env file contains Docker parameters for deployment. Update these parameters, especially the ports, as needed to avoid errors or conflicts with other running containers. Example:
 ```SERVER_PORT=8088
-REDIS_URL=redis
 REDIS_PORT=16379
 POSTGRES_USER=root
 POSTGRES_PASSWORD=Rootadmin1
-POSTGRES_HOST=postgres
 POSTGRES_PORT=15432
 POSTGRES_SCHEMA=carpark
 ```
