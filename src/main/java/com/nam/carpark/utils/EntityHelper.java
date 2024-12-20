@@ -4,6 +4,7 @@ import com.nam.carpark.model.CarPark;
 import com.nam.carpark.model.CarParkGeo;
 import com.nam.carpark.model.CarParkInfo;
 import com.nam.carpark.model.dto.CarParkAvailabilityResponse;
+import com.nam.carpark.model.dto.SearchCarParkResponse;
 import com.nam.carpark.provider.geo.constant.CarParkGeoHeaders;
 import com.thirparty.net.qxcg.svy21.LatLonCoordinate;
 import org.apache.commons.csv.CSVRecord;
@@ -73,6 +74,25 @@ public class EntityHelper {
                 .collect(Collectors.toList());
         carPark.setCarParkInfos(carParkInfos);
         return carPark;
+    }
+
+    public static SearchCarParkResponse createSearchCarParkResponse(CarPark carPark, CarParkGeo carParkGeo, double distance) {
+        SearchCarParkResponse response = new SearchCarParkResponse();
+        response.setCarParkNumber(carParkGeo.getCarParkNo());
+        response.setAddress(carParkGeo.getAddress());
+        response.setLatitude(carParkGeo.getLat());
+        response.setLongitude(carParkGeo.getLon());
+
+        if (carPark.getCarParkInfos() != null) {
+            response.setTotalLots(carPark.getCarParkInfos().stream().mapToInt(info -> info.getTotalLots()).sum());
+            response.setAvailableLots(carPark.getCarParkInfos().stream().mapToInt(info -> info.getLotsAvailable()).sum());
+        } else {
+            response.setTotalLots(0);
+            response.setAvailableLots(0);
+        }
+
+        response.setDistance(distance);
+        return response;
     }
 
     public static CarParkGeo fromCsvToCarParkGeo(CSVRecord csvRecord) {
