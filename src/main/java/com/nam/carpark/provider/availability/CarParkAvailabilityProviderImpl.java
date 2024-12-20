@@ -1,5 +1,6 @@
 package com.nam.carpark.provider.availability;
 
+import com.nam.carpark.exception.CarParkPollingException;
 import com.nam.carpark.model.CarPark;
 import com.nam.carpark.model.dto.CarParkAvailabilityResponse;
 import com.nam.carpark.model.dto.CarParkAvailabilityResponse.CarParkData;
@@ -38,18 +39,23 @@ public class CarParkAvailabilityProviderImpl implements CarParkAvailabilityProvi
     @Override
     @Transactional
     public synchronized void poll() {
-        CarParkAvailabilityResponse response = requestExternalData();
-        if (response != null && response.getItems() != null && !response.getItems().isEmpty()) {
-            CarParkAvailabilityResponse.Item mainItemResponse = response.getItems().get(0);
-            LocalDateTime currentTimestamp = DateTimeUtils.parseDateTimeWithZone(mainItemResponse.getTimestamp());
+        try {
+            CarParkAvailabilityResponse response = requestExternalData();
+            if (response != null && response.getItems() != null && !response.getItems().isEmpty()) {
+                CarParkAvailabilityResponse.Item mainItemResponse = response.getItems().get(0);
+                LocalDateTime currentTimestamp = DateTimeUtils.parseDateTimeWithZone(mainItemResponse.getTimestamp());
 
-            if (carParkSyncUpSession.shouldSyncUp(currentTimestamp)) {
-                logger.info("Timestamp has changed to {}, start to sync up with local database", currentTimestamp);
-                processInBatch(mainItemResponse.getCarparkData());
-                carParkSyncUpSession.updateTimestamp(currentTimestamp);
-            } else {
-                logger.info("Timestamp {} has not changed, no sync up will happen", currentTimestamp);
+                if (carParkSyncUpSession.shouldSyncUp(currentTimestamp)) {
+                    logger.info("Timestamp has changed to {}, start to sync up with local database", currentTimestamp);
+                    processInBatch(mainItemResponse.getCarparkData());
+                    carParkSyncUpSession.updateTimestamp(currentTimestamp);
+                } else {
+                    logger.info("Timestamp {} has not changed, no sync up will happen", currentTimestamp);
+                }
             }
+        } catch (Exception exception) {
+            logger.error("Polling to URL {} failed due to error: {}", externalUrl, exception.getMessage(), exception);
+            throw new CarParkPollingException("Failed to poll car park availability due to an error", exception);
         }
     }
 

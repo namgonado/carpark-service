@@ -1,4 +1,4 @@
-package com.nam.carpark.controller.exception.handler;
+package com.nam.carpark.exception.handler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
