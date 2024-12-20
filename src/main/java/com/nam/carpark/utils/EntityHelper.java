@@ -17,7 +17,19 @@ import java.util.stream.Collectors;
 public class EntityHelper {
 
     public static void populateCarParkInfo(CarPark carPark, CarParkAvailabilityResponse.CarParkData data) {
-        carPark.setUpdateDatetime(LocalDateTime.parse(data.getUpdateDatetime()));
+        LocalDateTime newUpdateDatetime = LocalDateTime.parse(data.getUpdateDatetime());
+        LocalDateTime currentUpdateDatetime = carPark.getUpdateDatetime();
+
+        if (currentUpdateDatetime == null || newUpdateDatetime.isAfter(currentUpdateDatetime)) {
+            carPark.setUpdateDatetime(newUpdateDatetime);
+            mergeCarParkInfos(carPark, data);
+        } else if (newUpdateDatetime.isBefore(currentUpdateDatetime)) {
+            carPark.setUpdateDatetime(newUpdateDatetime);
+            clearAndSetCarParkInfos(carPark, data);
+        }
+    }
+
+    private static void mergeCarParkInfos(CarPark carPark, CarParkAvailabilityResponse.CarParkData data) {
         List<CarParkInfo> existingInfos = carPark.getCarParkInfos();
         Map<String, CarParkInfo> existingInfoMap = existingInfos.stream()
                 .collect(Collectors.toMap(CarParkInfo::getLotType, info -> info));
@@ -28,30 +40,37 @@ public class EntityHelper {
                 existingInfo.setTotalLots(Integer.parseInt(newInfo.getTotalLots()));
                 existingInfo.setLotsAvailable(Integer.parseInt(newInfo.getLotsAvailable()));
             } else {
-                CarParkInfo carParkInfo = new CarParkInfo();
-                carParkInfo.setLotType(newInfo.getLotType());
-                carParkInfo.setTotalLots(Integer.parseInt(newInfo.getTotalLots()));
-                carParkInfo.setLotsAvailable(Integer.parseInt(newInfo.getLotsAvailable()));
-                carParkInfo.setCarPark(carPark);
+                CarParkInfo carParkInfo = createCarParkInfo(carPark, newInfo);
                 existingInfos.add(carParkInfo);
             }
         }
         carPark.setCarParkInfos(existingInfos);
     }
 
+    private static void clearAndSetCarParkInfos(CarPark carPark, CarParkAvailabilityResponse.CarParkData data) {
+        List<CarParkInfo> newInfos = new ArrayList<>();
+        for (CarParkAvailabilityResponse.CarParkInfo newInfo : data.getCarparkInfo()) {
+            CarParkInfo carParkInfo = createCarParkInfo(carPark, newInfo);
+            newInfos.add(carParkInfo);
+        }
+        carPark.getCarParkInfos().clear();
+        carPark.getCarParkInfos().addAll(newInfos);
+    }
+    private static CarParkInfo createCarParkInfo(CarPark carPark, CarParkAvailabilityResponse.CarParkInfo newInfo) {
+        CarParkInfo carParkInfo = new CarParkInfo();
+        carParkInfo.setLotType(newInfo.getLotType());
+        carParkInfo.setTotalLots(Integer.parseInt(newInfo.getTotalLots()));
+        carParkInfo.setLotsAvailable(Integer.parseInt(newInfo.getLotsAvailable()));
+        carParkInfo.setCarPark(carPark);
+        return carParkInfo;
+    }
     public static CarPark createNewCarPark(CarParkAvailabilityResponse.CarParkData data) {
         CarPark carPark = new CarPark();
         carPark.setCarparkNumber(data.getCarparkNumber());
         carPark.setUpdateDatetime(LocalDateTime.parse(data.getUpdateDatetime()));
-        List<CarParkInfo> carParkInfos = new ArrayList<>();
-        for (CarParkAvailabilityResponse.CarParkInfo info : data.getCarparkInfo()) {
-            CarParkInfo carParkInfo = new CarParkInfo();
-            carParkInfo.setLotType(info.getLotType());
-            carParkInfo.setTotalLots(Integer.parseInt(info.getTotalLots()));
-            carParkInfo.setLotsAvailable(Integer.parseInt(info.getLotsAvailable()));
-            carParkInfo.setCarPark(carPark);
-            carParkInfos.add(carParkInfo);
-        }
+        List<CarParkInfo> carParkInfos = data.getCarparkInfo().stream()
+                .map(info -> createCarParkInfo(carPark, info))
+                .collect(Collectors.toList());
         carPark.setCarParkInfos(carParkInfos);
         return carPark;
     }
