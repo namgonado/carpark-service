@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface CarParkGeoProvider {
     CarParkGeo getCarParkByNo(String carParkNo);
-    List<CarParkGeo> getAllCarPark();
+    List<CarParkGeo> getAllCarParks();
 }

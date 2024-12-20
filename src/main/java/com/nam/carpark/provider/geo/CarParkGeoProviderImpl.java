@@ -55,7 +55,7 @@ public class CarParkGeoProviderImpl implements CarParkGeoProvider {
     }
 
     @Override
-    public List<CarParkGeo> getAllCarPark() {
+    public List<CarParkGeo> getAllCarParks() {
         return new ArrayList<>(carParkGeoMap.values());
     }
 }
