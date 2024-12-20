@@ -121,8 +121,6 @@ GET http://localhost:8088/carparks/nearest?latitude=1.347643&longitude=103.95779
   - Kafka is a superior alternative to the fixed-list polling approach for car park availability due to its numerous advantages:
      - It efficiently accumulates event messages over time, ensuring no data is lost.
      - Its asynchronous processing capabilities allow for better scalability and system resilience.
-  - Despite these benefits, Kafka is not implemented in this version due to the lack of a defined message format in the requirements.
-  - The existing classes and components are designed for extensibility, allowing Kafka integration in the future without significant architectural changes.
-
+     - Although not implemented due to undefined message formats, the architecture supports easy integration. A Kafka provider can be added, by update carpark.provider.availability.type from "POLLING" to another value, which disables the polling provider. This highlights the application's configurability and extensibility.
 ## Contacts
 - Solution Architect [nam le-hong](namgonado@gmail.com)

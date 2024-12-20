@@ -44,6 +44,7 @@ spring:
 carpark:
   provider:
     availability:
+      type: POLLING #default provider is polling, implement another provider like KAFKA
       external-source: 'https://api.data.gov.sg/v1/transport/carpark-availability'
       syncup:
         cron-job:
