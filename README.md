@@ -41,6 +41,7 @@ Follow these steps to build and deploy the Carpark Service project:
    ```bash
    docker logs carpark-service
    ```
+   **Note**: Most of the containers use default ports. There is a high probability that you may already have some Docker containers running locally with the same ports, which can cause the containers to fail to start up. If this happens, update the ports in the .env file to new, unused ports.
 
 5. **Refresh the Deployment**: If you need to refresh the deployment, stop and remove all containers, networks, and volumes created by docker compose:
    ```bash
@@ -50,12 +51,11 @@ Follow these steps to build and deploy the Carpark Service project:
    ```bash
    docker compose -f docker-compose.yml up --build --detach
    ```
-
 6. **Access the Server**: By default, the server is available at:
    [http://localhost:8088](http://localhost:8088)
 
 ## Configuration
-
+### Application properties
 The application is configured using properties in the `application.yaml` file. Refer to the file to update properties, then rebuild the application and redeploy the containers.
 
 ```yaml
@@ -77,6 +77,18 @@ carpark:
 - `cache`: Defines the cache mechanism to use. Options are:
     - `IN_MEMORY`: Cache data in memory.
     - `GLOBAL_REDIS`: Cache data in a global Redis instance.
+
+### Deployment properties
+The .env file contains Docker parameters for deployment. Update these parameters, especially the ports, as needed to avoid errors or conflicts with other running containers. Example:
+```SERVER_PORT=8088
+REDIS_URL=redis
+REDIS_PORT=16379
+POSTGRES_USER=root
+POSTGRES_PASSWORD=Rootadmin1
+POSTGRES_HOST=postgres
+POSTGRES_PORT=15432
+POSTGRES_SCHEMA=carpark
+```
 ## APIs
 1. Trigger Car Park Polling (Sync Up)
 Manually trigger the car park polling sync up by sending a POST request to:

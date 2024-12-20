@@ -15,14 +15,14 @@ public class CarParkController {
 
     @Autowired
     private CarParkAvailabilityProvider carParkInfoProvider;
-
-    @PostMapping("/sync")
-    public void syncCarParkInfo() {
-        carParkInfoProvider.poll();
-    }
-
     @Autowired
     private CarParkSearchService carParkSearchService;
+
+    @PostMapping("/sync")
+    public String syncCarParkInfo() {
+        carParkInfoProvider.poll();
+        return "Car Park Polling sync up has been complete";
+    }
 
     @GetMapping("/nearest")
     public ResponseEntity<?> getNearestCarParks(
@@ -30,10 +30,6 @@ public class CarParkController {
             @RequestParam(required = true) Double longitude,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(name = "per_page", defaultValue = "10") int perPage) {
-
-        if (latitude == null || longitude == null) {
-            return ResponseEntity.badRequest().body("Latitude and Longitude are required parameters.");
-        }
 
         List<SearchCarParkResponse> carParks = carParkSearchService.findNearestCarParks(latitude, longitude, page, perPage);
         return ResponseEntity.ok(carParks);

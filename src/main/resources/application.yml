@@ -21,7 +21,7 @@ spring:
   data:
     redis:
       host: ${REDIS_URL:redis}
-      port: ${REDIS_PORT:6379}
+      port: ${INTERNAL_REDIS_PORT:6379}
       #username: ${REDIS_USERNAME}
       #password: ${REDIS_PASSWORD}
       database: ${REDIS_DB_INDEX:0}
@@ -29,7 +29,7 @@ spring:
       timeout: 5000 # 5 Seconds
       connect-timeout: 5000
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:postgres}:5432/carpark?currentSchema=carpark&serverTimezone=UTC
+    url: jdbc:postgresql://${POSTGRES_HOST:postgres}:${INTERNAL_POSTGRES_PORT:5432}/carpark?currentSchema=${POSTGRES_SCHEMA:carpark}&serverTimezone=UTC
     username: ${POSTGRES_USER:root}
     password: ${POSTGRES_PASSWORD:Rootadmin1}
     driver-class-name: org.postgresql.Driver
@@ -40,6 +40,16 @@ spring:
     locations: classpath:db/migration
     schemas:
       - ${POSTGRES_SCHEMA:carpark}
+
+carpark:
+  provider:
+    availability:
+      external-source: 'https://api.data.gov.sg/v1/transport/carpark-availability'
+      syncup:
+        cron-job:
+          enable: true   # Set true to enable cron job polling
+          interval: 60   # second
+        cache: IN_MEMORY # possible value: IN_MEMORY, GLOBAL_REDIS
 
 #  quartz:
 #    job-store-type: jdbc
@@ -57,13 +67,3 @@ spring:
 #            misfireThreshold: 60000
 #            clusterCheckinInterval: 5000
 #            isClustered: true
-
-carpark:
-  provider:
-    availability:
-      external-source: 'https://api.data.gov.sg/v1/transport/carpark-availability'
-      syncup:
-        cron-job:
-          enable: true   # Set true to enable cron job polling
-          interval: 60   # second
-        cache: IN_MEMORY # possible value: IN_MEMORY, GLOBAL_REDIS

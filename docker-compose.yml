@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   carpark-service:
     build:
@@ -8,35 +6,47 @@ services:
         JAR_FILE: ./target/car-park-0.0.1-SNAPSHOT.jar
     container_name: carpark-service
     ports:
-      - 8088:8088
+      - "${SERVER_PORT:-8088}:${SERVER_PORT:-8088}"
+    environment:
+      - SERVER_PORT=${SERVER_PORT:-8088}
+      - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_USER=${POSTGRES_USER:-root}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-Rootadmin1}
+      - POSTGRES_SCHEMA=${POSTGRES_SCHEMA:-carpark}
+      - REDIS_URL=${REDIS_URL:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
     networks:
-    - carpark-network
+      - carpark-network
+
   redis:
     container_name: redis-for-carpark
     image: redis:7.0.11-alpine
     ports:
-      - '6379:6379'
-    #command: --requirepass ${REDIS_PASSWORD}
+      - "${REDIS_PORT:-6379}:${INTERNAL_REDIS_PORT:-6379}"
     volumes:
       - redis:/data
     networks:
       - carpark-network
+
   postgres:
     image: postgres:15.3-alpine
     restart: 'unless-stopped'
     container_name: postgres-for-carpark
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:${INTERNAL_POSTGRES_PORT:-5432}"
     environment:
       POSTGRES_DB: carpark
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: Rootadmin1
-      POSTGRES_SCHEMA: carpark
+      POSTGRES_USER: ${POSTGRES_USER:-root}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Rootadmin1}
+      POSTGRES_SCHEMA: ${POSTGRES_SCHEMA:-carpark}
     networks:
       - carpark-network
+
 volumes:
   redis:
     driver: local
+
 networks:
   carpark-network:
     driver: bridge
