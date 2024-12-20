@@ -47,8 +47,9 @@ Follow these steps to build and deploy the Carpark Service project:
    ```bash
    docker compose -f docker-compose.yml down
    ```
-   Then, redeploy the containers:
+   Then, recompile source code and redeploy the containers:
    ```bash
+   mvn clean package -DskipTests
    docker compose -f docker-compose.yml up --build --detach
    ```
 6. **Access the Server**: By default, the server is available at:
