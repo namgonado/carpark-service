@@ -5,9 +5,14 @@ spring:
   datasource:
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:5432/carpark?currentSchema=carpark&serverTimezone=UTC
 
+  jpa:
+    hibernate:
+      ddl-auto: create
+
 carpark:
   provider:
     availability:
+      #type: KAFKA #default provider is polling, implement another provider like KAFKA
       syncup:
         cron-job:
           enable: true  # Set true to enable cron job polling

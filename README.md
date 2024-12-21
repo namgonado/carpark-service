@@ -121,5 +121,71 @@ GET http://localhost:8088/carparks/nearest?latitude=1.347643&longitude=103.95779
      - It efficiently accumulates event messages over time, ensuring no data is lost.
      - Its asynchronous processing capabilities allow for better scalability and system resilience.
      - Although not implemented due to undefined message formats, the architecture supports easy integration. A Kafka provider can be added, by update carpark.provider.availability.type from "POLLING" to another value, which disables the polling provider. This highlights the application's configurability and extensibility.
+## Technical Concerns
+The primary architectural challenge in this car park project is efficiently pulling availability data from the external API (https://api.data.gov.sg/v1/transport/carpark-availability) and synchronizing it with the local database.
+
+Deploying Kafka as a messaging service is the ideal solution for handling update/add data events from the external source. Kafka facilitates real-time synchronization between the upstream API and the downstream database. Additionally, it simplifies scaling the service, especially when the upstream emits a high volume of events that could otherwise overwhelm the sync process.
+
+However, due to the lack of a defined message format in the requirements and the absence of a real upstream source to test Kafka, this solution is not feasible within the limited timeline for this test assignment. A synchronous polling solution is implemented instead.
+
+### Synchronous Polling Solution by CarParkAvailabilityProvider:
+This solution addresses the challenge of processing large volumes of data retrieved from the upstream API. 
+It also considers the scalability of services by splitting data processing across multiple nodes.
+
+To enhance the processing speed of the standalone service, the following techniques are applied:
+
+***Batch Processing:***
+The service processes data in batches (default size: 500). It retrieves and merges or adds new data to the database as needed.
+
+The current implementation achieves a processing speed of 1,500 entities per second, which is acceptable for this test environment. However, it requires a more scalable architecture for a production system handling millions of records. Logs from the carpark-service provide additional performance insights.
+
+***Cache Modification inspection:***
+A caching mechanism is implemented to monitor the entity's updateDateTime. An entity is updated or added to the local database only if its updateDateTime has changed.
+
+Two types of caches are used:
+
+1. IN_MEMORY: Suitable for standalone services.
+2. GLOBAL_REDIS: Designed for scalable systems to ensure data consistency across multiple nodes.
+
+***Multiple Threading consideration:***
+Database I/O operations are the primary bottleneck when processing a large amount of data. 
+Multi-threading (e.g., 2× the number of cores) could significantly boost performance. 
+However, this approach introduces the risk of data integrity issues when dealing with updates. 
+For instance, car park data (e.g., carpark_number: SE12) with different timestamps:
+```json
+{
+"carpark_info": [
+{"total_lots": "0", "lot_type": "L", "lots_available": "0"},
+{"total_lots": "0", "lot_type": "M", "lots_available": "0"},
+{"total_lots": "0", "lot_type": "S", "lots_available": "0"}
+],
+"carpark_number": "SE12",
+"update_datetime": "2022-10-05T11:24:29"
+}
+```
+```json
+{
+"carpark_info": [
+{"total_lots": "722", "lot_type": "C", "lots_available": "465"}
+],
+"carpark_number": "SE12",
+"update_datetime": "2024-12-21T13:28:17"
+} 
+```
+Multiple threads cannot guarantee to process these records in chronological order, risking data inconsistency. Therefore, multi-threading is not used in this version.
+
+#### Scalability Considerations:
+To achieve scalability, the upstream API must meet two conditions:
+
+1. Provide segmentation parameters (e.g., ?start=10000&end=20000) for chunk-based data retrieval.
+2. Ensure data is sorted by update_datetime.
+
+The current upstream API lacks these features, limiting the scalability of the service. Nevertheless, the current implementation already supports scalability using a global Redis cache. This setup can easily extend the polling architecture to a distributed, scalable service.
+
+### Conclusion:
+Kafka remains the best choice for building an asynchronous, scalable, and real-time syncing system between the upstream API and the downstream database. 
+Amazingly, integrate Kafka provider is simpler than implementing the polling system, and can leverage pre-built components like EntityHelper, CarParkSyncUpCache, and CarParkPollingConfiguration...
+
+The current polling system, while limited, lays a foundation for future improvements and scalable architecture.
 ## Contacts
 - Solution Architect [nam le-hong](namgonado@gmail.com)

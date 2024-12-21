@@ -4,6 +4,7 @@ import com.nam.carpark.exception.CarParkPollingException;
 import com.nam.carpark.model.CarPark;
 import com.nam.carpark.model.dto.CarParkAvailabilityResponse;
 import com.nam.carpark.model.dto.CarParkAvailabilityResponse.CarParkData;
+import com.nam.carpark.provider.availability.configuration.CarParkPollingConfig;
 import com.nam.carpark.repository.CarParkRepository;
 import com.nam.carpark.utils.DateTimeUtils;
 import com.nam.carpark.utils.EntityHelper;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -19,7 +21,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
 public class CarParkAvailabilityProviderImpl implements CarParkAvailabilityProvider {
     private static final Logger logger = LoggerFactory.getLogger(CarParkAvailabilityProviderImpl.class);
 
@@ -66,6 +67,11 @@ public class CarParkAvailabilityProviderImpl implements CarParkAvailabilityProvi
     private void processInBatch(List<CarParkData> carparkDataList) {
         int updatedCount = 0;
         int addedCount = 0;
+
+        Set<String> processedCarParkNumbers = new HashSet<>();
+        List<CarParkData> duplicateCarParks = carparkDataList.stream()
+                .filter(data -> !processedCarParkNumbers.add(data.getCarparkNumber()))
+                .collect(Collectors.toList());
 
         List<CarParkData> sortedCarparkDataList = carparkDataList.stream()
                 .sorted(Comparator.comparing(data -> LocalDateTime.parse(data.getUpdateDatetime())))

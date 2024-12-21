@@ -13,15 +13,18 @@ import java.util.List;
 @RequestMapping("/carparks")
 public class CarParkController {
 
-    @Autowired
+    @Autowired(required = false)
     private CarParkAvailabilityProvider carParkInfoProvider;
     @Autowired
     private CarParkSearchService carParkSearchService;
 
     @PostMapping("/sync")
-    public String syncCarParkInfo() {
+    public ResponseEntity<String> syncCarParkInfo() {
+        if (carParkInfoProvider == null) {
+            return ResponseEntity.status(500).body("Polling feature is not available");
+        }
         carParkInfoProvider.poll();
-        return "Car Park Polling sync up has been complete";
+        return ResponseEntity.ok("Car Park Polling sync up has been complete");
     }
 
     @GetMapping("/nearest")
